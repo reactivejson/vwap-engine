@@ -2,7 +2,7 @@
 
 **[VWAP](https://en.wikipedia.org/wiki/Volume-weighted_average_price) Calculator for Go.**
 
-![Maintainer](https://img.shields.io/badge/maintainer-Mohamed Aly-blue)
+![Maintainer](https://img.shields.io/badge/maintainer-Mohamed-Aly-blue)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/reactivejson/vwap-engine.svg)](https://github.com/reactivejson/vwap-engine)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)
 ![Build Status](https://github.com/reactivejson/vwap-engine/actions/workflows/go.yml/badge.svg)
