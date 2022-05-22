@@ -1,4 +1,4 @@
-name: Vwap-Go
+name: Go
 
 on:
   push:
