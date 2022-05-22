@@ -20,6 +20,13 @@ vwap-engine
     ├── api
     │   └── models
     │     └── coinbase.go
+    ├── cmd
+    │   └── main.go
+    ├── internal
+    │   └── app
+    │     └── app.go
+    │     └── setup.go
+    │     └── context.go
     │   └── tunnel
     │     └── receiver.go
     │     └── tunnel.go
@@ -49,6 +56,15 @@ A coinbase websocket stream client to receive data from coinbase websocket serve
 Every time a new data point is added to the queue and saved for each trading pair, the VWAP computation is updated accordingly.
 For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
 and CumulativePriceQuantity for existing data points and updated with new entries.
+
+### App
+Setup the config, run the App context, subscribe to the ws, and initiate the vwap storage and calculation for the trading pairs. It is resilient tolerant.
+## Setup
+The app is configurable via the ENV variables or Helm values for cloud-native deployment
+Config parameters:
+- TRADING_PAIRS: a list of coinbase product IDS. Example: BTC-USD,ETH-USD,ETH-BTC
+- WEBSOCKET_URL: coinbase websocket server. Example: wss://ws-feed.pro.coinbase.com
+- WINDOW_SIZE: Data points sliding window for VWAP computation.
 
 ## Test coverage
 
