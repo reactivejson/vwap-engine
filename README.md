@@ -57,6 +57,11 @@ Every time a new data point is added to the queue and saved for each trading pai
 For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
 and CumulativePriceQuantity for existing data points and updated with new entries.
 
+
+### Main
+The core entry point into the app. will setup the config,
+run the App context, It is resilient tolerant. It will gracefully shutdown and can receive an interrupt signal and safely close the connexio.
+
 ### App
 Setup the config, run the App context, subscribe to the ws, and initiate the vwap storage and calculation for the trading pairs. It is resilient tolerant.
 ## Setup
@@ -66,6 +71,28 @@ Config parameters:
 - WEBSOCKET_URL: coinbase websocket server. Example: wss://ws-feed.pro.coinbase.com
 - WINDOW_SIZE: Data points sliding window for VWAP computation.
 
+
+### Getting started
+Vwap engine is available in github
+[Vwap-engine](https://github.com/reactivejson/vwap-engine)
+
+```shell
+go get github.com/reactivejson/storage-engine
+```
+
+#### Run
+```shell
+go run cmd/main.go
+```
+
+#### Build
+```shell
+make build
+```
+#### Testing
+```shell
+make test
+```
 ## Test coverage
 
 Test coverage is checked as a part of test execution with the gotestsum tool.
