@@ -2,13 +2,14 @@
 
 **[VWAP](https://en.wikipedia.org/wiki/Volume-weighted_average_price) Calculator for Go.**
 
-![](https://img.shields.io/github/license/reactivejson/vwap-engine.svg)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/reactivejson/vwap-engine.svg)](https://github.com/reactivejson/vwap-engine)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)
 ![Build Status](https://github.com/reactivejson/vwap-engine/actions/workflows/go.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/reactivejson/vwap-engine)](https://goreportcard.com/report/github.com/reactivejson/vwap-engine)
+![](https://img.shields.io/github/license/reactivejson/vwap-engine.svg)
 
 
-Go implementation of VWAP formula, vwap is calculated in real time utilizing
+Go implementation of Volume-weighted average price. vwap is calculated in real time utilizing
 the Coinbase websocket stream "wss://ws-feed.pro.coinbase.com". For each trading pair, the calculated VWAP will be logged to Stdout.
 The default trading pairs are BTC-USD, ETH-USD, and ETH-BTC, but you can define your owns via ENV variables
 
