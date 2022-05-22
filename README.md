@@ -2,12 +2,12 @@
 
 **[VWAP](https://en.wikipedia.org/wiki/Volume-weighted_average_price) Calculator for Go.**
 
+![Maintainer](https://img.shields.io/badge/maintainer-Mohamed Aly-blue)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/reactivejson/vwap-engine.svg)](https://github.com/reactivejson/vwap-engine)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)
 ![Build Status](https://github.com/reactivejson/vwap-engine/actions/workflows/go.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/reactivejson/vwap-engine)](https://goreportcard.com/report/github.com/reactivejson/vwap-engine)
 ![](https://img.shields.io/github/license/reactivejson/vwap-engine.svg)
-
 
 Go implementation of Volume-weighted average price. vwap is calculated in real time utilizing
 the Coinbase websocket stream "wss://ws-feed.pro.coinbase.com". For each trading pair, the calculated VWAP will be logged to Stdout.
@@ -22,6 +22,9 @@ This layout is following pattern:
 vwap-engine
 └───
     ├── .env // optional
+    ├── .github
+    │   └── workflows
+    │     └── go.yml
     ├── api
     │   └── models
     │     └── coinbase.go
