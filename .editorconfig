@@ -1,0 +1,18 @@
+root = true
+
+[*]
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[Makefile]
+indent_size = 4
+indent_style = tab
+
+[{go.mod,*.go}]
+indent_size = 4
+indent_style = tab
+
+[{*.yml,*.yaml}]
+indent_size = 2
+indent_style = space
