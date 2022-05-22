@@ -1,0 +1,4 @@
+dependencies:
+  - name: helper-chart
+    version: 0.1.x
+    repository: https://repo.lab.pl.alcatel-lucent.com/neo-helm-releases

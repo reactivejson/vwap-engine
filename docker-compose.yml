@@ -1,0 +1,60 @@
+version: '2.4'
+# FYI: start_period works only for version >= 3.4
+services:
+  kafka:
+    image: registry1-docker-io.repo.lab.pl.alcatel-lucent.com/bitnami/kafka:2.8.0
+    hostname: localhost
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_HEAP_OPTS: -Xmx256m -Xms256m
+      LOG4J_LOGGER_KAFKA: ERROR
+      LOG4J_LOGGER_ORG_APACHE_KAFKA: ERROR
+      LOG4J_LOGGER_ORG_I0ITEC_ZKCLIENT_ZKCLIENT: ERROR
+      LOG4J_LOGGER_ORG_APACHE_ZOOKEEPER: ERROR
+      LOG4J_ROOTLOGGER: "ERROR,stdout,kafkaAppender"
+      JVMFLAGS: "-XX:ActiveProcessorCount=1"
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: "zookeeper-shell.sh $$KAFKA_ZOOKEEPER_CONNECT ls /brokers/ids | tail -1 | grep -v '\\[\\]'"
+      interval: 10s
+      timeout: 30s
+      retries: 10
+    networks:
+      - gotest
+
+  zookeeper:
+    image: registry1-docker-io.repo.lab.pl.alcatel-lucent.com/bitnami/zookeeper:3.5.6
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_LOG4J_PROP: "ERROR,ROLLINGFILE"
+      ZOO_HEAP_SIZE: 256
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      JVMFLAGS: "-XX:ActiveProcessorCount=1"
+    healthcheck:
+      test: "/opt/bitnami/zookeeper/bin/zkServer.sh status"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    networks:
+      - gotest
+
+
+  dependencies:
+    image: registry1-docker-io.repo.lab.pl.alcatel-lucent.com/zablvit/zero@sha256:7037ea9215d458532f7ea171c7b65eea7e2c7659f3b0667c70fa48a13ad69a1f
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+networks:
+  gotest:
+    driver: bridge
+    name: gotest
+

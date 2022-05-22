@@ -1,0 +1,40 @@
+# registry to pull images from
+registry: ${DOCKER_REGISTRY}
+global:
+  helper_antiAffinityMode: soft
+  runAsNonRoot: true
+  runAsUser: 1101
+  fsGroup: 1101
+
+replicas: 1
+resources:
+  # Limits to cap the resource usage in case of unexpected.
+  #   NOTE! exceeding memory limit will cause pod to be killed by kubernetes.
+  limits:
+    cpu: 1
+    memory: 1Gi
+  # Requests to help kubernetes start pods on a node that has sufficient capacity.
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+loggingLevel: info
+
+tracing:
+  enabled: false
+
+metricsPort: 8080
+clusterResources:
+  enabled: true
+  sa: workingset-operator-sa
+  binding: workingset-operator-role-binding
+  role: workingset-operator-role
+
+cr:
+  finalizers: "finalizer.ws.nokia.com"
+
+coinbase:
+  websocketUrl: wss://ws-feed.pro.coinbase.com
+  tradingPairs: "BTC-USD,ETH-USD,ETH-BTC"
+  windowSize: 200
+

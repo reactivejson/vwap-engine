@@ -33,6 +33,10 @@ vwap-engine
     │   └── storage
     │     └── vwap.go
     │     └── vwap-queue.go
+    ├── build
+    │   └── Dockerfile
+    ├── helm
+    │   └── <helm chart files>
     ├── Makefile
     ├── Jenkinsfile
     ├── README.md
@@ -64,12 +68,18 @@ run the App context, It is resilient tolerant. It will gracefully shutdown and c
 
 ### App
 Setup the config, run the App context, subscribe to the ws, and initiate the vwap storage and calculation for the trading pairs. It is resilient tolerant.
+
+### Helm & K8S
+Helm charts to deploy this micro-service in a Kubernetes platform
+We generate the container image and reference it in a Helm chart
+
 ## Setup
 The app is configurable via the ENV variables or Helm values for cloud-native deployment
 Config parameters:
 - TRADING_PAIRS: a list of coinbase product IDS. Example: BTC-USD,ETH-USD,ETH-BTC
 - WEBSOCKET_URL: coinbase websocket server. Example: wss://ws-feed.pro.coinbase.com
 - WINDOW_SIZE: Data points sliding window for VWAP computation.
+
 
 
 ### Getting started
@@ -92,6 +102,18 @@ make build
 #### Testing
 ```shell
 make test
+```
+
+### Build docker image:
+
+```bash
+make docker-build
+```
+This will build this application docker image so-called vwap-engine
+
+### Deploy with Helm chart in a Kubernetes environment
+```bash
+ helm upgrade --namespace neo --install vwap-engine chart/vwap-engine -f your-custom-values.yml
 ```
 ## Test coverage
 
