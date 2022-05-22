@@ -25,7 +25,7 @@ func verifyWsSub(t *testing.T, done chan struct{}, wantErr bool) func(w http.Res
 			err = conn.ReadJSON(&subMsg)
 			assert.NoError(t, err)
 			assert.Equal(t, "subscribe", subMsg.Type)
-			assert.Equal(t, []string{"Test"}, subMsg.ProductIDs)
+			assert.Equal(t, []string{"BTC-USD"}, subMsg.ProductIDs)
 		}
 		done <- struct{}{}
 
@@ -44,9 +44,23 @@ func wsDial(t *testing.T, wantErr bool) func(w http.ResponseWriter, r *http.Requ
 func wsSuccess(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = ws.Upgrader{}
-		conn, err := upgrader.Upgrade(w, r, nil)
+		c, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer c.Close()
+		for {
+			mt, message, err := c.ReadMessage()
+			if err != nil {
+				break
+			}
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				break
+			}
+		}
+
 		assert.NoError(t, err)
-		defer conn.Close()
 	}
 }
 

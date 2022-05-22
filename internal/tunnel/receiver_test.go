@@ -1,11 +1,14 @@
 package tunnel
 
 import (
-	"context"
-	"github.com/reactivejson/vwap-engine/api/models"
-	"testing"
-
+	ws "github.com/gorilla/websocket"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
 )
 
 /**
@@ -14,45 +17,122 @@ import (
  */
 
 var (
-	wsURL = "wss://ws-feed.pro.coinbase.com"
+	webSocketURL string
 )
 
-func TestNewReceiver(t *testing.T) {
-	t.Parallel()
-
-	_, err := NewReceiver(wsURL)
-	require.NoError(t, err)
+func setUpWSServer(handlerFunc http.HandlerFunc) *httptest.Server {
+	server := httptest.NewServer(handlerFunc)
+	webSocketURL = "ws" + strings.TrimPrefix(server.URL, "http")
+	return server
 }
 
-func TestTunnelSubscribe_AndRead_ShouldSucceed(t *testing.T) {
-	t.Parallel()
+func TestNewTunnel(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"Valid handshake", false},
+		{"InValid handshake", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 
-	ctx := context.Background()
+			server := setUpWSServer(wsDial(t, tt.wantErr))
+			defer server.Close()
 
-	receiver := make(chan *models.CoinbaseResponse)
+			t.Parallel()
 
-	ws, err := NewReceiver(wsURL)
-	require.NoError(t, err)
+			tunnel, err := NewReceiver(webSocketURL)
 
-	err = ws.Subscribe([]string{"BTC-USD"})
-	ws.Read(ctx, receiver)
-	require.NoError(t, err)
-	defer ws.Close()
-	var limit int
-	// Check the first couple of responses.
-	for response := range receiver {
-		if limit >= 3 {
-			break
-		}
+			if !tt.wantErr {
+				defer tunnel.Close()
+			}
 
-		//check for a proper response type, since the first one is a subscription msg
-		//&{[{matches [BTC-USD]}]     subscriptions  0 }
-		//Received: &{[{matches [BTC-USD]}]     subscriptions  0 }
-		//Received: &{[]  29303.34 BTC-USD 0.00324023 last_match 2022-05-21T09:12:02.350239Z 341498073 buy}
-		//Received: &{[]  29303.35 BTC-USD 0.0000299 match 2022-05-21T09:12:04.862866Z 341498074 sell}
-		if response.Type == "match" {
-			require.Equal(t, "BTC-USD", response.ProductID)
-		}
-		limit++
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+		})
+	}
+}
+
+func TestTunnelr_Close(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"Close", false},
+		{"Invalid close", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			scanner, reader, writer := scannerHelper(t)
+			defer resetScanner(reader, writer)
+
+			server := setUpWSServer(wsSuccess(t))
+			defer server.Close()
+
+			dialer := ws.Dialer{HandshakeTimeout: 5 * time.Second}
+			conn, _, err := dialer.Dial(webSocketURL, http.Header{})
+
+			tunnel, err := NewReceiverWithconn(webSocketURL, conn)
+			require.NoError(t, err)
+			defer tunnel.Close()
+
+			if tt.wantErr {
+				err := conn.Close()
+				assert.NoError(t, err)
+			}
+			tunnel.Close()
+
+			if tt.wantErr {
+				scanner.Scan()
+				assert.Contains(t, scanner.Text(), "error for Tunnel close")
+			} else {
+				assert.Empty(t, scanner.Text())
+			}
+		})
+	}
+}
+
+func TestTunnel_Subscribe(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"test valid subscribe", false},
+		{"test error from writeJSON", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, reader, writer := scannerHelper(t)
+			defer resetScanner(reader, writer)
+
+			done := make(chan struct{})
+			server := setUpWSServer(verifyWsSub(t, done, tt.wantErr))
+			defer server.Close()
+
+			dialer := ws.Dialer{HandshakeTimeout: 5 * time.Second}
+			conn, _, err := dialer.Dial(webSocketURL, http.Header{})
+
+			tunnel, err := NewReceiverWithconn(webSocketURL, conn)
+			require.NoError(t, err)
+			if tt.wantErr {
+				conn.Close()
+			} else {
+				defer conn.Close()
+			}
+
+			err = tunnel.Subscribe([]string{"BTC-USD"})
+			if tt.wantErr {
+				assert.Error(t, err)
+				conn.Close()
+			} else {
+				conn.Close()
+				assert.NoError(t, err)
+			}
+		})
 	}
 }
