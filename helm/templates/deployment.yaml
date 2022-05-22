@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{template "storage-engine.name" .}}
+  labels:
+{{ include "storage-engine.labels.standard" . | indent 4}}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+{{ include "storage-engine.app" . | indent 6}}
+  template:
+    metadata:
+      labels:
+{{ include "storage-engine.app" . | indent 8}}
+    spec:
+      containers:
+        - name: storage-engine
+          image: {{.Values.registry}}/storage-engine:{{.Chart.Version}}
+          command:
+            - storage-engine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: APP_NAME
+              value: {{template "storage-engine.name" .}}
+            - name: LOGGING_LEVEL
+              value: {{.Values.loggingLevel  | quote }}
+            - name: TRACING_ENABLED
+              value: {{ .Values.tracing.enabled | quote }}
+            - name: METRICS_ADDR
+              value: ":{{.Values.metricsPort}}"
+            - name: WEBSOCKET_URL
+              value: {{ .Values.coinbase.websocketUrl | quote }}
+            - name: TRADING_PAIRS
+              value: {{ .Values.coinbase.tradingPairs | quote }}
+            - name: WINDOW_SIZE
+              value: {{ .Values.coinbase.windowSize | quote }}
+
+{{ include "neohelperchart.lifecycle-definitions" . | indent 10 }}
+          resources:
+{{ toYaml .Values.resources | indent 14 }}
+      affinity:
+{{ include "neohelperchart.anti-affinity-definitions" . | indent 8 }}
