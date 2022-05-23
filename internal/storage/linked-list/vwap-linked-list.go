@@ -8,6 +8,7 @@ import (
 )
 
 // vwapLinkedList represents a doubly linked list as a queue of DataPoints.
+// Manipulation with Linked List is faster than Array List because it uses a doubly linked list, so no bit shifting is required in memory.
 //Every time a new data point is added to the queue and saved for each trading pair, the VWAP computation is updated accordingly.
 // For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
 //and CumulativePriceQuantity for existing data points and updated with new entries.
