@@ -5,7 +5,7 @@
 ![Maintainer](https://img.shields.io/badge/maintainer-MohamedAly-blue)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/reactivejson/vwap-engine.svg)](https://github.com/reactivejson/vwap-engine)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)](https://pkg.go.dev/badge/github.com/reactivejson/vwap-engine)
-![Build Status](https://github.com/reactivejson/vwap-engine/actions/workflows/go.yml/badge.svg)
+[![Go](https://github.com/reactivejson/vwap-engine/actions/workflows/go.yml/badge.svg)](https://github.com/reactivejson/vwap-engine/actions/workflows/go.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/reactivejson/vwap-engine)](https://goreportcard.com/report/github.com/reactivejson/vwap-engine)
 ![](https://img.shields.io/github/license/reactivejson/vwap-engine.svg)
 
