@@ -9,12 +9,51 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/reactivejson/vwap-engine)](https://goreportcard.com/report/github.com/reactivejson/vwap-engine)
 ![](https://img.shields.io/github/license/reactivejson/vwap-engine.svg)
 
-Go implementation of Volume-weighted average price. vwap is calculated in real time utilizing
+Go implementation of real-time VWAP (volume-weighted average price) calculation engine. vwap is calculated in real time utilizing
 the Coinbase websocket stream "wss://ws-feed.pro.coinbase.com". For each trading pair, the calculated VWAP will be logged to Stdout.
 The default trading pairs are BTC-USD, ETH-USD, and ETH-BTC, but you can define your owns via ENV variables
 
+## Workflow
 
-## Project layout
+- Subscribe to the matches channel and retrieve data feed from the coinbase websocket. Default trading pairs' data: BTC-USD, ETH-USD, and ETH-BTC.
+- Calculate the VWAP per trading pair using a sliding window(default 200) data points. VWAP is cached for each trading pair.
+- When a new data point arrives through the websocket feed the oldest data point will fall off and the new one will be
+  added such that no more than 200 data points are included in the calculation.
+
+## Architecture
+This application main components comprises:
+
+### Tunnel interface
+A coinbase websocket stream client to receive data from coinbase websocket server.
+1) It subscribes(Tunnel.Subscribe) to the coinbase channel's websocket using trading pairs (productIDs).
+2) Read (Tunnel.Read) real-time data points from the coinbase and passes them to the receiver channel.
+
+### VWAP interface:
+- Represents a queue of DataPoints and their VWAPs.
+- DataPoints  is fast circular fifo data structure (aka., queue) with a specific limit.
+- The arrays allocated in memory are never returned. Therefor A dynamic doubly Linked list structure, is better to be used for a long-living queue.
+- For every new coinbase entry, it pushes an item onto the queue and calculates the new VWAP.
+- When Limit is reached, will delete  the first one.
+Every time a new data point is added to the queue and saved for each trading pair, the VWAP computation is updated accordingly.
+For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
+and CumulativePriceQuantity for existing data points and updated with new entries.
+
+Two implementations:
+1) Doubly linked-list queue: Manipulation with LinkedList is faster than ArrayList because it uses a doubly linked list, so no bit shifting is required in memory.
+2) Array-backed queue: Manipulation with ArrayList is slow because it internally uses an array. If any element is removed from the array, all the other elements are shifted in memory.
+
+### Main
+The core entry point into the app. will setup the config,
+run the App context, It is resilient tolerant. It will gracefully shutdown and can receive an interrupt signal and safely close the connexio.
+
+### App
+Setup the config, run the App context, subscribe to the ws, and initiate the vwap storage and calculation for the trading pairs. It is resilient tolerant.
+
+### Helm & K8S
+Helm charts to deploy this micro-service in a Kubernetes platform
+We generate the container image and reference it in a Helm chart
+
+### Project layout
 
 This layout is following pattern:
 
@@ -54,39 +93,6 @@ vwap-engine
     ├── VERSION
     └── <source packages>
 ```
-
-## Architecture
-This application main components comprises:
-
-### Tunnel interface
-A coinbase websocket stream client to receive data from coinbase websocket server.
-1) It subscribes(Tunnel.Subscribe) to the coinbase channel's websocket using trading pairs (productIDs).
-2) Read (Tunnel.Read) real-time data points from the coinbase and passes them to the receiver channel.
-
-### VWAP interface:
-- represents a queue of DataPoints and their VWAPs.
-- DataPoints  is fast circular fifo data structure (aka., queue) with a specific limit.
-- The arrays allocated in memory are never returned. Therefor A dynamic doubly Linked list structure, is better to be used for a long-living queue.
-- For every new coinbase entry, it pushes an item onto the queue and calculates the new VWAP.
-- When Limit is reached, will delete  the first one.
-Every time a new data point is added to the queue and saved for each trading pair, the VWAP computation is updated accordingly.
-For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
-and CumulativePriceQuantity for existing data points and updated with new entries.
-
-Two implementations:
-1) Doubly linked-list queue: Manipulation with LinkedList is faster than ArrayList because it uses a doubly linked list, so no bit shifting is required in memory.
-2) Array-backed queue: Manipulation with ArrayList is slow because it internally uses an array. If any element is removed from the array, all the other elements are shifted in memory.
-
-### Main
-The core entry point into the app. will setup the config,
-run the App context, It is resilient tolerant. It will gracefully shutdown and can receive an interrupt signal and safely close the connexio.
-
-### App
-Setup the config, run the App context, subscribe to the ws, and initiate the vwap storage and calculation for the trading pairs. It is resilient tolerant.
-
-### Helm & K8S
-Helm charts to deploy this micro-service in a Kubernetes platform
-We generate the container image and reference it in a Helm chart
 
 ## Setup
 The app is configurable via the ENV variables or Helm values for cloud-native deployment
