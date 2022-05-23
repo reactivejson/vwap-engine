@@ -41,9 +41,11 @@ func main() {
 	//The arrays allocated in memory are never returned. Therefor A dynamic doubly Linked list structure, is better to be used for a long-living queue.
 	if cfg.WindowSize < 500 {
 		// Array backed queue
+		// Manipulation with ArrayList is slow because it internally uses an array. If any element is removed from the array, all the other elements are shifted in memory.
 		queue, err = queue2.NewVwapQueue(cfg.WindowSize)
 	} else {
 		// doubly linked-list queue
+		// Manipulation with LinkedList is faster than ArrayList because it uses a doubly linked list, so no bit shifting is required in memory.
 		queue, err = linked_list.NewVwapLinkedList(cfg.WindowSize)
 	}
 	if err != nil {

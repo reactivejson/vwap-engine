@@ -73,10 +73,9 @@ Every time a new data point is added to the queue and saved for each trading pai
 For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
 and CumulativePriceQuantity for existing data points and updated with new entries.
 
-Two implementations available:
+Two implementations:
 1) Doubly linked-list queue: Manipulation with LinkedList is faster than ArrayList because it uses a doubly linked list, so no bit shifting is required in memory.
 2) Array-backed queue: Manipulation with ArrayList is slow because it internally uses an array. If any element is removed from the array, all the other elements are shifted in memory.
-
 
 ### Main
 The core entry point into the app. will setup the config,
