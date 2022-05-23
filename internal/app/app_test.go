@@ -23,11 +23,7 @@ func TestParseData_ShouldSucceed(t *testing.T) {
 
 	dataPoint, err := parseData(data)
 	require.NoError(t, err)
-	require.Equal(t, storage.DataPoint{
-		Price:       1,
-		Quantity:    1,
-		TradingPair: "TradingPair1"},
-		dataPoint)
+	require.Equal(t, storage.NewPoint(1, 1, "TradingPair1"), dataPoint)
 }
 
 func TestParseData_ShouldFail(t *testing.T) {

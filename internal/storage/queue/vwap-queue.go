@@ -1,7 +1,7 @@
-package storage
+package queue
 
 import (
-	"fmt"
+	"github.com/reactivejson/vwap-engine/internal/storage"
 	"sync"
 )
 
@@ -12,7 +12,7 @@ import (
 type vwapQueue struct {
 	mu sync.Mutex
 	//DataPoints  is fast circular fifo data structure (aka., queue) with a specific limit.
-	DataPoints              []DataPoint
+	DataPoints              []storage.Point
 	CumulativePriceQuantity map[string]float64 // Equation = Sum(Price*Quantity), Sum of Price * Quantity for each TradingPair for each window
 	CumulativeQuantity      map[string]float64 // Equation = Sum(Quantity), Sum of Quantities for every TradingPair for each window
 	VWAP                    map[string]float64 //Equation: VWAP = Sum(Price*Quantity) / Sum(Quantity) Volume Weighted Average Price is calculated for every TradingPair for each window
@@ -21,14 +21,9 @@ type vwapQueue struct {
 }
 
 //NewVwapQueue  creates a new VWAP queue and initializes all fields needed to make the VWAP Queue.
-func NewVwapQueue(dataPoint []DataPoint, maxSize uint) (Vwap, error) {
-
-	if len(dataPoint) > int(maxSize) {
-		return &vwapQueue{}, fmt.Errorf("initial datapoints exceeds maxSize")
-	}
-
+func NewVwapQueue(maxSize uint) (storage.Vwap, error) {
 	return &vwapQueue{
-		DataPoints:              dataPoint,
+		DataPoints:              []storage.Point{},
 		Limit:                   maxSize,
 		CumulativePriceQuantity: make(map[string]float64),
 		CumulativeQuantity:      make(map[string]float64),
@@ -40,10 +35,8 @@ func NewVwapQueue(dataPoint []DataPoint, maxSize uint) (Vwap, error) {
 func (l *vwapQueue) Size() uint {
 	return uint(len(l.DataPoints))
 }
-
-// Get returns the data point item at given index.
-func (l *vwapQueue) Get(i int) DataPoint {
-	return l.DataPoints[i]
+func (l *vwapQueue) GetDataPoints() any {
+	return l.DataPoints
 }
 
 // GetVwap returns the VWAP for a  trading pair.
@@ -53,7 +46,7 @@ func (l *vwapQueue) GetVwap(tradingPair string) float64 {
 
 // Push pushes an item onto the queue
 //When Limit is reached, will delete  the first one.
-func (l *vwapQueue) Push(d DataPoint) {
+func (l *vwapQueue) Push(d storage.Point) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -67,27 +60,27 @@ func (l *vwapQueue) Push(d DataPoint) {
 }
 
 //computeVwap is used to compute the VWAP for a given trading pair.
-func (l *vwapQueue) computeVwap(d DataPoint) {
-	vw := d.Price * d.Quantity
-	l.CumulativePriceQuantity[d.TradingPair] = l.CumulativePriceQuantity[d.TradingPair] + vw
-	l.CumulativeQuantity[d.TradingPair] = l.CumulativeQuantity[d.TradingPair] + d.Quantity
+func (l *vwapQueue) computeVwap(d storage.Point) {
+	vw := d.ComputePQ()
+	l.CumulativePriceQuantity[d.ProductID()] = l.CumulativePriceQuantity[d.ProductID()] + vw
+	l.CumulativeQuantity[d.ProductID()] = l.CumulativeQuantity[d.ProductID()] + d.GetQuantity()
 	//VWAP = Sum(Price*Quantity) / Sum(Quantity)
-	l.VWAP[d.TradingPair] = l.CumulativePriceQuantity[d.TradingPair] / l.CumulativeQuantity[d.TradingPair]
+	l.VWAP[d.ProductID()] = l.CumulativePriceQuantity[d.ProductID()] / l.CumulativeQuantity[d.ProductID()]
 }
 
 // Remove removes 1st item from the queue.
 func (l *vwapQueue) remove() {
 
 	it := l.DataPoints[0]
-	l.DataPoints[0] = DataPoint{}
+	l.DataPoints[0] = nil
 
 	// Subtract the values of 1st item from the VWAP computation..
-	l.CumulativePriceQuantity[it.TradingPair] = l.CumulativePriceQuantity[it.TradingPair] - it.Price*it.Quantity
-	l.CumulativeQuantity[it.TradingPair] = l.CumulativeQuantity[it.TradingPair] - it.Quantity
+	l.CumulativePriceQuantity[it.ProductID()] = l.CumulativePriceQuantity[it.ProductID()] - it.ComputePQ()
+	l.CumulativeQuantity[it.ProductID()] = l.CumulativeQuantity[it.ProductID()] - it.GetQuantity()
 
 	//VWAP = Sum(Price*Quantity) / Sum(Quantity)
-	if l.CumulativeQuantity[it.TradingPair] != 0 {
-		l.VWAP[it.TradingPair] = l.CumulativePriceQuantity[it.TradingPair] / l.CumulativeQuantity[it.TradingPair]
+	if l.CumulativeQuantity[it.ProductID()] != 0 {
+		l.VWAP[it.ProductID()] = l.CumulativePriceQuantity[it.ProductID()] / l.CumulativeQuantity[it.ProductID()]
 	}
 
 	//removes 1st item from the queue

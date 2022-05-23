@@ -47,22 +47,22 @@ func (s *Context) Run(ctx context.Context) (err error) {
 	return
 }
 
-//Convert JSON response (models.CoinbaseResponse) to a storage.DataPoint
-func parseData(response *models.CoinbaseResponse) (storage.DataPoint, error) {
+//Convert JSON response (models.CoinbaseResponse) to a storage.Point
+func parseData(response *models.CoinbaseResponse) (storage.Point, error) {
 	price, err := strconv.ParseFloat(response.Price, 64)
 	if err != nil {
-		return storage.DataPoint{}, fmt.Errorf("Error parsing price %s: %w", response.Price, err)
+		return nil, fmt.Errorf("Error parsing price %s: %w", response.Price, err)
 	}
 
 	quantity, err := strconv.ParseFloat(response.Size, 64)
 	if err != nil {
-		return storage.DataPoint{}, fmt.Errorf("Error parsing quantity %s: %w", response.Size, err)
+		return nil, fmt.Errorf("Error parsing quantity %s: %w", response.Size, err)
 	}
 
-	return storage.DataPoint{
-		Price:       price,
-		Quantity:    quantity,
-		TradingPair: response.ProductID,
-	}, nil
+	return storage.NewPoint(
+		price,
+		quantity,
+		response.ProductID,
+	), nil
 
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/reactivejson/vwap-engine/internal/app"
 	"github.com/reactivejson/vwap-engine/internal/storage"
+	"github.com/reactivejson/vwap-engine/internal/storage/linked-list"
+	queue2 "github.com/reactivejson/vwap-engine/internal/storage/queue"
 	"github.com/reactivejson/vwap-engine/internal/tunnel"
 	"log"
 	"os"
@@ -34,7 +36,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	queue, err := storage.NewVwapQueue([]storage.DataPoint{}, cfg.WindowSize)
+	var queue storage.Vwap
+
+	//The arrays allocated in memory are never returned. Therefor A dynamic doubly Linked list structure, is better to be used for a long-living queue.
+	if cfg.WindowSize < 500 {
+		// Array backed queue
+		queue, err = queue2.NewVwapQueue(cfg.WindowSize)
+	} else {
+		// doubly linked-list queue
+		queue, err = linked_list.NewVwapLinkedList(cfg.WindowSize)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

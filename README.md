@@ -40,7 +40,10 @@ vwap-engine
     │     └── tunnel.go
     │   └── storage
     │     └── vwap.go
-    │     └── vwap-queue.go
+    │     └── linked-list
+    │         └── vwap-linked-list.go
+    │     └── queue
+    │         └── vwap-queue.go
     ├── build
     │   └── Dockerfile
     ├── helm
@@ -63,12 +66,16 @@ A coinbase websocket stream client to receive data from coinbase websocket serve
 ### VWAP interface:
 - represents a queue of DataPoints and their VWAPs.
 - DataPoints  is fast circular fifo data structure (aka., queue) with a specific limit.
+- The arrays allocated in memory are never returned. Therefor A dynamic doubly Linked list structure, is better to be used for a long-living queue.
 - For every new coinbase entry, it pushes an item onto the queue and calculates the new VWAP.
 - When Limit is reached, will delete  the first one.
 Every time a new data point is added to the queue and saved for each trading pair, the VWAP computation is updated accordingly.
 For performance, and to avoid exponential complexity, the computation is cached for VWAP, CumulativeQuantity,
 and CumulativePriceQuantity for existing data points and updated with new entries.
 
+Two implementations:
+1) Doubly linked-list queue
+2) Array-backed queue
 
 ### Main
 The core entry point into the app. will setup the config,
