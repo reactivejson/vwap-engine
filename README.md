@@ -41,9 +41,9 @@ vwap-engine
     │   └── storage
     │     └── vwap.go
     │     └── linked-list
-    │         └── vwap-linked-list.go
+    │         └── vwap_linked_list.go
     │     └── queue
-    │         └── vwap-queue.go
+    │         └── vwap_queue.go
     ├── build
     │   └── Dockerfile
     ├── helm
