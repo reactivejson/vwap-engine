@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2022
+ */
+
 // VwapQueue represents a queue of DataPoints.
 // Manipulation with ArrayList is slow because it internally uses an array. If any element is removed from the array, all the other elements are shifted in memory.
 //Every time a new data point is added to the queue and saved for each trading pair, the VWAP computation is updated accordingly.
