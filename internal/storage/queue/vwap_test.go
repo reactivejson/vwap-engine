@@ -9,6 +9,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2022
+ */
+
 var dps = map[string]storage.Point{
 	"1": storage.NewPoint(1, 1, "TradingPair1"),
 	"2": storage.NewPoint(2, 2, "TradingPair2"),
