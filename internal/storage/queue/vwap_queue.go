@@ -2,6 +2,7 @@ package queue
 
 import (
 	"github.com/reactivejson/vwap-engine/internal/storage"
+	"strings"
 	"sync"
 )
 
@@ -50,6 +51,10 @@ func (l *vwapQueue) GetVwap(tradingPair string) float64 {
 	return l.VWAP[tradingPair]
 }
 
+func (l *vwapQueue) GetVwaps() map[string]float64 {
+	return l.VWAP
+}
+
 // Push pushes an item onto the queue
 //When Limit is reached, will delete  the first one.
 func (l *vwapQueue) Push(d storage.Point) {
@@ -91,4 +96,8 @@ func (l *vwapQueue) remove() {
 
 	//removes 1st item from the queue
 	l.DataPoints = l.DataPoints[1:]
+}
+
+func (l *vwapQueue) String() string {
+	return strings.Join(storage.Format(l.VWAP), " | ")
 }
