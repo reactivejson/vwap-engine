@@ -40,9 +40,7 @@ func (s *Context) Run(ctx context.Context) (err error) {
 
 		// Log VWAPs of trading pairs to stdout.
 		fmt.Println(time.Now().Format(time.UnixDate))
-		for _, v := range s.cfg.TradingPairs {
-			fmt.Println(v, s.queue.GetVwap(v))
-		}
+		fmt.Println("VWAPs:", s.queue)
 	}
 	return
 }

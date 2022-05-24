@@ -44,7 +44,10 @@ func TestLinkedListPush_withLimits_ShouldSucceed(t *testing.T) {
 	l = vwapQueue.GetDataPoints().(list.List)
 	require.Equal(t, 2, int(vwapQueue.Size()))
 	require.Equal(t, points["3"], l.Back().Value.(storage.Point))
+
+	require.Equal(t, 2, len(vwapQueue.GetVwaps()))
 }
+
 func TestVwapLinkedList_Size(t *testing.T) {
 	t.Parallel()
 

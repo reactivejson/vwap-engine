@@ -3,6 +3,7 @@ package linked_list
 import (
 	"container/list"
 	"github.com/reactivejson/vwap-engine/internal/storage"
+	"strings"
 
 	"sync"
 )
@@ -54,6 +55,10 @@ func (l *vwapLinkedList) GetVwap(tradingPair string) float64 {
 	return l.VWAP[tradingPair]
 }
 
+func (l *vwapLinkedList) GetVwaps() map[string]float64 {
+	return l.VWAP
+}
+
 // Push pushes an item onto the queue
 //When Limit is reached, will delete  the first one.
 func (l *vwapLinkedList) Push(d storage.Point) {
@@ -92,4 +97,8 @@ func (l *vwapLinkedList) remove() {
 
 	//removes 1st item from the queue
 	l.DataPoints.Remove(it)
+}
+
+func (l *vwapLinkedList) String() string {
+	return strings.Join(storage.Format(l.VWAP), " | ")
 }

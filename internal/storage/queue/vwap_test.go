@@ -42,7 +42,10 @@ func TestPushQueue_withLimits_ShouldSucceed(t *testing.T) {
 	require.Equal(t, 2, int(vwapQueue.Size()))
 	l = vwapQueue.GetDataPoints().([]storage.Point)
 	require.Equal(t, dps["3"], l[1])
+
+	require.Equal(t, 2, len(vwapQueue.GetVwaps()))
 }
+
 func TestVwapQueue_Size(t *testing.T) {
 	t.Parallel()
 
